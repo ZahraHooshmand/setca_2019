@@ -1,0 +1,289 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "data\\water.xyz\n"
+     ]
+    }
+   ],
+   "source": [
+    "import numpy as np\n",
+    "import os\n",
+    "\n",
+    "file_location = os.path.join('data','water.xyz')\n",
+    "print (file_location)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "xyz_file = open(file_location,'r')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "data = xyz_file.readlines()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "['3\\n', 'Water xyz file\\n', 'O        0.000000     -0.007156      0.965491\\n', 'H1      -0.000000      0.001486     -0.003471\\n', 'H2       0.000000      0.931026      1.207929\\n']\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(data)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "3\n"
+     ]
+    }
+   ],
+   "source": [
+    "num_atom = int(data[0])\n",
+    "print(num_atom)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "['O        0.000000     -0.007156      0.965491\\n', 'H1      -0.000000      0.001486     -0.003471\\n', 'H2       0.000000      0.931026      1.207929\\n']\n"
+     ]
+    }
+   ],
+   "source": [
+    "coord_data = data[2:] #putting aside the first two lines that contain number of atoms and the name of compound\n",
+    "print(coord_data)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "symbols = []\n",
+    "coordinates = []\n",
+    "for atom in coord_data:\n",
+    "    atom_data = atom.split()\n",
+    "    symbol = atom_data[0]\n",
+    "    symbols.append(symbol)\n",
+    "    x, y, z = float(atom_data[1]), float(atom_data[2]), float(atom_data[3])\n",
+    "    coordinates.append([x, y, z])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "['O', 'H1', 'H2']\n"
+     ]
+    }
+   ],
+   "source": [
+    "print (symbols)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[[0.0, -0.007156, 0.965491], [-0.0, 0.001486, -0.003471], [0.0, 0.931026, 1.207929]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(coordinates)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "O to H1: 0.969\n",
+      "O to H2: 0.969\n"
+     ]
+    }
+   ],
+   "source": [
+    "for numA, atomA in enumerate(coordinates):\n",
+    "    for numB, atomB in enumerate(coordinates): # Avoid recalculating the distance from atomA to atomB\n",
+    "        if numA<numB:\n",
+    "            x_distance = atomA[0]-atomB[0]\n",
+    "            y_distance = atomA[1]-atomB[1]\n",
+    "            z_distance = atomA[2]-atomB[2]\n",
+    "            distance = np.sqrt(x_distance**2 + y_distance**2 + z_distance**2)\n",
+    "            if distance>0 and distance<1.5:  # Avoid printing meaningless bond lengths\n",
+    "                print(F'{symbols[numA]} to {symbols[numB]}: {distance:.3f}')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Now we want to learn a better way to calculate distances:\n",
+    "# Functions are much easier to test\n",
+    "def calculate_distance(atom1, atom2):\n",
+    "    x_distance = atom1[0]-atom2[0]\n",
+    "    y_distance = atom1[1]-atom2[1]\n",
+    "    z_distance = atom1[2]-atom2[2]\n",
+    "    distance = np.sqrt(x_distance**2 + y_distance**2 + z_distance**2)\n",
+    "    return distance"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def bond_check(bond_distance): \n",
+    "    if bond_distance>0 and bond_distance<1.5: # Here the variable should be bond_distance as it was defined in the previous line\n",
+    "        return True\n",
+    "    else:\n",
+    "        return False"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "O to H1: 0.969\n",
+      "O to H2: 0.969\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Now use the function above:\n",
+    "for numA, atomA in enumerate(coordinates):\n",
+    "    for numB, atomB in enumerate(coordinates): # Avoid recalculating the distance from atomA to atomB\n",
+    "        if numA<numB:\n",
+    "            distance_AB=calculate_distance(atomA, atomB) # We are using the function we defined above\n",
+    "            if bond_check(distance_AB) is True: \n",
+    "                print(F'{symbols[numA]} to {symbols[numB]}: {distance_AB:.3f}')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 56,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# An important advice: One function, one job\n",
+    "# Now le's make our bond check function more general:\n",
+    "def bond_check(bond_distance, minimum_value, maximum_value): # If you give numbers to minimum_value and maximum_value it will be the default value\n",
+    "    if bond_distance>minimum_value and bond_distance<maximum_value: # Here the variable should be bond_distance as it was defined in the previous line\n",
+    "        return True\n",
+    "    else:\n",
+    "        return False"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 59,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "O to H1: 0.969\n",
+      "O to H2: 0.969\n"
+     ]
+    }
+   ],
+   "source": [
+    "for numA, atomA in enumerate(coordinates):\n",
+    "    for numB, atomB in enumerate(coordinates): # Avoid recalculating the distance from atomA to atomB\n",
+    "        if numA<numB:\n",
+    "            distance_AB=calculate_distance(atomA, atomB) # We are using the function we defined above\n",
+    "            if bond_check(distance_AB, minimum_value=0, maximum_value=1.5) is True: \n",
+    "                print(F'{symbols[numA]} to {symbols[numB]}: {distance_AB:.3f}')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
